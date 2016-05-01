@@ -2,7 +2,7 @@ library(jsonlite)
 library(dplyr)
 get_shots = function(player_id, season){
   #TEST: James Harden player_id= "201935", season = "2014-15"
-  #Michael Jordan player_id = "893"season = "1990-91"
+  #TEST: Michael Jordan player_id = "893"season = "1990-91"
   #query JSON url using specified player_id and season
   shots_url = paste0('http://stats.nba.com/stats/shotchartdetail?CFID=33&CFPAR',
   'AMS=', season,'&ContextFilter=','&ContextMeasure=FGA', '&DateFrom=', '&DateTo=',
@@ -41,8 +41,6 @@ get_shots = function(player_id, season){
     shots = data.frame(matrix(nrow = 0, ncol = length(col_names)))
     names(shots) = tolower(shots_data$resultSets$headers[[1]])
   }
-  
-  
 }
 
 

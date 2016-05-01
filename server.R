@@ -5,7 +5,7 @@ library(shiny)
 library(ggplot2)
 
 shinyServer(function(input, output) {
-  
+  #dynamically updates the seasons in which player was active into a select Input box
   output$season <- renderUI({
     startyear = players$from_year[players$display_first_last == input$player]
     endyear = players$to_year[players$display_first_last == input$player]
@@ -14,12 +14,12 @@ shinyServer(function(input, output) {
     seasons_choices = mapply(function(x,y) paste0(x,"-",substr(y,3,4)) , x=seasons, y=seasons_1)
     selectInput("season", "Select Season:", seasons_choices)
   })
-  
+  #obtains JSON pull for shot data based on player and season input
   shots = reactive({
     player_id = players$person_id[players$display_first_last == input$player]
     get_shots(player_id, input$season)
   })
-  
+  #plots the court and shot by categorization of shot
   output$shot_plot <- renderPlot({
     ggplot(shots(), aes(x=loc_x, y=loc_y)) + 
       #outer borders
