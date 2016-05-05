@@ -2,6 +2,7 @@
 # Scrape webpages to get colleges of active players
 
 # Getting Player Stats by College
+source("players_data.R")
 
 library(rvest)
 library(stringr)
@@ -45,3 +46,8 @@ get_df = function(page){
 
 playercolleges = lapply(subpages, get_df) %>% rbind_all()
 
+
+active_players <- merge(playercolleges, players, by.x = "player", by.y = "display_first_last")
+active_players <- active_players %>% filter(roster_status != 0)
+
+save(active_players, file="active_players.Rdata")
