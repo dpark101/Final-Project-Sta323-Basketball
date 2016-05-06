@@ -46,14 +46,20 @@ shinyUI(
                         hr(),
                         selectInput("school2", "Select Second School:", sort(unique(active_players$school)), selected = "University of North Carolina"), # Maybe make so you can't select same school?
                         radioButtons("choices", "Display:", c("School-Aggregated Stats", "Individual Player Stats")),
-                        actionButton('gen_plot_comp', "Compare Alumni NBA Stats!")
+                        actionButton('gen_plot_comp', "Compare Alumni NBA Stats!"),
+                        
+                        
+                        checkboxInput("checkbox", label = "show plots", value = FALSE)
+                        
                       ),
                       
                       mainPanel(
                         h4(),
                         tableOutput('school1table'),
                         hr(),
-                        tableOutput('school2table')
+                        tableOutput('school2table'),
+                        plotOutput('visual1'),
+                        plotOutput('visual2')
                       )
              )
   )

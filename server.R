@@ -124,19 +124,51 @@ shinyServer(function(input, output) {
         filter(school == input$school1)})
     school2_subset <- reactive({active_players %>%  
         filter(school == input$school2)})
+    school1=reactive({
+      j=school1_subset() %>% summarize(School = as.character(input$school1), Avg_games_played = mean(as.numeric(games)),
+                                       FG_percent = mean(as.numeric(FG_per)), FT_percent = mean(as.numeric(FT_per)), Minutes_pergame = mean(as.numeric(MP_pg)), PPG = mean(as.numeric(PTSpg)), RPG = mean(as.numeric(TRB_pg)), APG = mean(as.numeric(AST_pg)))
+      return(j)
+    })
+    school2=reactive({
+      j=school2_subset() %>% summarize(School = as.character(input$school2), Avg_games_played = mean(as.numeric(games)),
+                                       FG_percent = mean(as.numeric(FG_per)), FT_percent = mean(as.numeric(FT_per)), Minutes_pergame = mean(as.numeric(MP_pg)), PPG = mean(as.numeric(PTSpg)), RPG = mean(as.numeric(TRB_pg)), APG = mean(as.numeric(AST_pg)))
+      return(j)
+    })
+    
+    
     
     # Can display a table maybe?
     if({input$choices == "Individual Player Stats"}) {
       output$school1table <- renderTable({school1_subset() %>% select(Name = display_first_last, drafted = from_year, team_city, team_name, game_played = games,
-                                                                      FG_percent = FG_per, FT_percent = FT_per, Minutes_pergame = MP_pg, PPG = PTSpg, RPG = TRB_pg, AST = AST_pg)})
+                                                                      FG_percent = FG_per, FT_percent = FT_per, Minutes_pergame = MP_pg, PPG = PTSpg, RPG = TRB_pg, AST = AST_pg) })
       output$school2table <- renderTable({school2_subset() %>% select(Name = display_first_last, drafted = from_year, team_city, team_name, game_played = games,
                                                                       FG_percent = FG_per, FT_percent = FT_per, Minutes_pergame = MP_pg, PPG = PTSpg, RPG = TRB_pg, AST = AST_pg)})
     }
     if({input$choices == "School-Aggregated Stats"}) {
-      output$school1table <- renderTable({school1_subset() %>% summarize(School = as.character(input$school1), Avg_games_played = mean(as.numeric(games)),
-                                                                         FG_percent = mean(as.numeric(FG_per)), FT_percent = mean(as.numeric(FT_per)), Minutes_pergame = mean(as.numeric(MP_pg)), PPG = mean(as.numeric(PTSpg)), RPG = mean(as.numeric(TRB_pg)), APG = mean(as.numeric(AST_pg))) })
-      output$school2table <- renderTable({school2_subset() %>% summarize(School = as.character(input$school2), Avg_games_played = mean(as.numeric(games)),
-                                                                         FG_percent = mean(as.numeric(FG_per)), FT_percent = mean(as.numeric(FT_per)), Minutes_pergame = mean(as.numeric(MP_pg)), PPG = mean(as.numeric(PTSpg)), RPG = mean(as.numeric(TRB_pg)), APG = mean(as.numeric(AST_pg))) })
+      output$school1table <- renderTable({school1()})
+      output$school2table <- renderTable({school2() })
+      output$visual1=renderPlot(barplot(rbind(as.numeric(school1()%>%select(PPG,APG, RPG)), as.numeric(school2()%>%select(PPG,APG, RPG))), beside=TRUE, names=c("PPG", "APG", "RPG"), col=c("blue", "red"), legend = c(input$school1, input$school2), 
+                                        main=paste0(input$school1, " vs ", input$school2)))
+      
+      
+      output$visual2=renderPlot({
+        if (input$checkbox==TRUE){
+          
+          a=barplot(rbind(as.numeric(school1()%>%select(FG_percent, FT_percent)), as.numeric(school2()%>%select(FG_percent, FT_percent))), beside=TRUE, names=c("FG_percent", "FT_percent"), col=c("blue", "red"), legend = c(input$school1, input$school2), 
+                    main=paste0(input$school1, " vs ", input$school2))
+          return(a)
+        }
+      })
+      output$visual1=renderPlot({
+        if (input$checkbox==TRUE){
+          
+          a=barplot(rbind(as.numeric(school1()%>%select(PPG,APG, RPG)), as.numeric(school2()%>%select(PPG,APG, RPG))), beside=TRUE, names=c("PPG", "APG", "RPG"), col=c("blue", "red"), legend = c(input$school1, input$school2), 
+                    main=paste0(input$school1, " vs ", input$school2))
+          
+          return(a)
+        }
+      })
+      
     }
   })
   
