@@ -1,6 +1,13 @@
 if (("shiny" %in% rownames(installed.packages())) == FALSE){
   install.packages("shiny")
 }
+
+source("players_data.R")
+source("get_shots.R")
+
+load("active_players.Rdata")
+
+
 library(shiny)
 library(ggplot2)
 
@@ -14,13 +21,17 @@ shinyServer(function(input, output) {
     seasons_choices = mapply(function(x,y) paste0(x,"-",substr(y,3,4)) , x=seasons, y=seasons_1)
     selectInput("season", "Select Season:", seasons_choices)
   })
-  #obtains JSON pull for shot data based on player and season input
+  
+ 
+  
+  observeEvent(input$gen_plot, {
+    #obtains JSON pull for shot data based on player and season input
   shots = reactive({
     player_id = players$person_id[players$display_first_last == input$player]
     get_shots(player_id, input$season)
   })
-  #plots the court and shot by categorization of shot
-  output$shot_plot <- renderPlot({
+     #plots the court and shot by categorization of shot
+    output$shot_plot <- renderPlot({
     ggplot(shots(), aes(x=loc_x, y=loc_y)) + 
       #outer borders
       geom_path(data=data.frame(x=c(25,-25,-25,25,25),y=c(0,0,47,47,0)),aes(x=x,y=y)) +
@@ -47,5 +58,30 @@ shinyServer(function(input, output) {
       xlim(-25, 25) +
       ylim(-5, 47)
   })
+  })
   
-})
+  observeEvent(input$gen_plot_comp, {
+    # First, filter datasets by selected schools:
+    school1_subset <- reactive({active_players %>% 
+        filter(school == input$school1)})
+    school2_subset <- reactive({active_players %>%  
+        filter(school == input$school2)})
+    
+    # Can display a table maybe?
+    if({input$choices == "Individual Player Stats"}) {
+      output$school1table <- renderTable({school1_subset() %>% select(Name = display_first_last, drafted = from_year, team_city, team_name, game_played = games,
+                                                                    FG_percent = FG_per, FT_percent = FT_per, Minutes_pergame = MP_pg, PPG = PTSpg, RPG = TRB_pg, AST = AST_pg)})
+      output$school2table <- renderTable({school2_subset() %>% select(Name = display_first_last, drafted = from_year, team_city, team_name, game_played = games,
+                                                                   FG_percent = FG_per, FT_percent = FT_per, Minutes_pergame = MP_pg, PPG = PTSpg, RPG = TRB_pg, AST = AST_pg)})
+    }
+    if({input$choices == "School-Aggregated Stats"}) {
+      output$school1table <- renderTable({school1_subset() %>% summarize(School = as.character(input$school1), Avg_games_played = mean(as.numeric(games)),
+                                                                         FG_percent = mean(as.numeric(FG_per)), FT_percent = mean(as.numeric(FT_per)), Minutes_pergame = mean(as.numeric(MP_pg)), PPG = mean(as.numeric(PTSpg)), RPG = mean(as.numeric(TRB_pg)), APG = mean(as.numeric(AST_pg))) })
+      output$school2table <- renderTable({school2_subset() %>% summarize(School = as.character(input$school2), Avg_games_played = mean(as.numeric(games)),
+                                                                          FG_percent = mean(as.numeric(FG_per)), FT_percent = mean(as.numeric(FT_per)), Minutes_pergame = mean(as.numeric(MP_pg)), PPG = mean(as.numeric(PTSpg)), RPG = mean(as.numeric(TRB_pg)), APG = mean(as.numeric(AST_pg))) })
+    }
+  })
+  
+  })
+  
+  

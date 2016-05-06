@@ -6,3 +6,6 @@ players_data = fromJSON(players_url)
 players = tbl_df(data.frame(players_data$resultSets$rowSet[[1]], stringsAsFactors = FALSE))
 names(players) = tolower(players_data$resultSets$headers[[1]])
 
+# Only get active players
+
+players <- players %>% filter(rosterstatus != 0)
