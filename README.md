@@ -4,6 +4,7 @@ Players_data.R pulls all NBA players in history into a dataframe.
 Get_shots.R gets JSON data for every shot made by a specific player in a specific season then converts it into a tidy dataframe.
 Server.R sources players_data.R and get_shots.R to pull the required data for the Shiny App.
 UI.R is the front-end for the Shiny App.
+Explanation for the various Rdata files and how it's used?
 
 
 ## Shotmap
