@@ -22,42 +22,100 @@ shinyServer(function(input, output) {
     selectInput("season", "Select Season:", seasons_choices)
   })
   
- 
+  
   
   observeEvent(input$gen_plot, {
     #obtains JSON pull for shot data based on player and season input
-  shots = reactive({
-    player_id = players$person_id[players$display_first_last == input$player]
-    get_shots(player_id, input$season)
-  })
-     #plots the court and shot by categorization of shot
+    shots = reactive({
+      player_id = players$person_id[players$display_first_last == input$player]
+      a=get_shots(player_id, input$season)
+      if (input$regulation=="regulation"){
+        a=a[a$minute>=input$time[1] & a$minute<=input$time[2],]
+      }
+      if (input$regulation=="overtime"){
+        a=a[a$minute>=48,]
+      }
+      return(a)
+    })
+    
+    tablelocation=reactive({
+      a=shots()
+      percentage=NULL
+      location=NULL
+      shots_made=NULL
+      shots_attempted=NULL
+      df=NULL
+      for (i in unique(a$shot_zone_basic)){
+        b=filter(a, a$shot_zone_basic==i)
+        percentage=c(percentage, sum(b$shot_made_flag)/length(b$shot_made_flag))
+        location=c(location, i)
+        shots_made=c(shots_made, sum(b$shot_made_flag))
+        shots_attempted=c(shots_attempted, length(b$shot_made_flag))
+        df=data.frame(location, percentage, shots_made, shots_attempted)
+      }
+      return(df)
+    })
+    
+    
+    tableaction=reactive({
+      a=shots()
+      percentage=NULL
+      action=NULL
+      shots_made=NULL
+      shots_attempted=NULL
+      df=NULL
+      for (i in unique(a$action_type)){
+        b=filter(a, a$action_type==i)
+        percentage=c(percentage, sum(b$shot_made_flag)/length(b$shot_made_flag))
+        action=c(action, i)
+        shots_made=c(shots_made, sum(b$shot_made_flag))
+        shots_attempted=c(shots_attempted, length(b$shot_made_flag))
+        df=data.frame(action, percentage, shots_made, shots_attempted)
+        ans=head(df[order(-df$shots_attempted), ], n=10)
+      }
+      return(ans)
+    })
+    
+    
+    #plots the court and shot by categorization of shot
     output$shot_plot <- renderPlot({
-    ggplot(shots(), aes(x=loc_x, y=loc_y)) + 
-      #outer borders
-      geom_path(data=data.frame(x=c(25,-25,-25,25,25),y=c(0,0,47,47,0)),aes(x=x,y=y)) +
-      #top freethrow semicircle
-      geom_path(data=data.frame(x=c(-6000:(-1)/1000,1:6000/1000),y=c(19+sqrt(6^2-c(-6000:(-1)/1000,1:6000/1000)^2))),aes(x=x,y=y))+
-      #bottom freethrow semicircle
-      geom_path(data=data.frame(x=c(-6000:(-1)/1000,1:6000/1000),y=c(19-sqrt(6^2-c(-6000:(-1)/1000,1:6000/1000)^2))),aes(x=x,y=y),linetype='dashed')+
-      #key
-      geom_path(data=data.frame(x=c(-8,-8,8,8,-8),y=c(0,19,19,0,0)),aes(x=x,y=y))+
-      #box inside key
-      geom_path(data=data.frame(x=c(-6,-6,6,6,-6),y=c(0,19,19,0,0)),aes(x=x,y=y))+
-      #restricted area semicircle
-      geom_path(data=data.frame(x=c(-4000:(-1)/1000,1:4000/1000),y=c(5.25+sqrt(4^2-c(-4000:(-1)/1000,1:4000/1000)^2))),aes(x=x,y=y))+
-      #halfcourt semicircle
-      geom_path(data=data.frame(x=c(-6000:(-1)/1000,1:6000/1000),y=c(47-sqrt(6^2-c(-6000:(-1)/1000,1:6000/1000)^2))),aes(x=x,y=y))+
-      #rim
-      geom_path(data=data.frame(x=c(-750:(-1)/1000,1:750/1000,750:1/1000,-1:-750/1000),y=c(c(5.25+sqrt(0.75^2-c(-750:(-1)/1000,1:750/1000)^2)),c(5.25-sqrt(0.75^2-c(750:1/1000,-1:-750/1000)^2)))),aes(x=x,y=y))+
-      #backboard
-      geom_path(data=data.frame(x=c(-3,3),y=c(4,4)),aes(x=x,y=y),lineend='butt')+
-      #3 pt. line
-      geom_path(data=data.frame(x=c(-22,-22,-22000:(-1)/1000,1:22000/1000,22,22),y=c(0,169/12,5.25+sqrt(23.75^2-c(-22000:(-1)/1000,1:22000/1000)^2),169/12,0)),aes(x=x,y=y))+
-      #shot type identifier based on color and shape
-      geom_point(aes(colour = shot_zone_basic, shape = event_type)) +
-      xlim(-25, 25) +
-      ylim(-5, 47)
-  })
+      ggplot(shots(), aes(x=loc_x, y=loc_y)) + 
+        #outer borders
+        geom_path(data=data.frame(x=c(25,-25,-25,25,25),y=c(0,0,47,47,0)),aes(x=x,y=y)) +
+        #top freethrow semicircle
+        geom_path(data=data.frame(x=c(-6000:(-1)/1000,1:6000/1000),y=c(19+sqrt(6^2-c(-6000:(-1)/1000,1:6000/1000)^2))),aes(x=x,y=y))+
+        #bottom freethrow semicircle
+        geom_path(data=data.frame(x=c(-6000:(-1)/1000,1:6000/1000),y=c(19-sqrt(6^2-c(-6000:(-1)/1000,1:6000/1000)^2))),aes(x=x,y=y),linetype='dashed')+
+        #key
+        geom_path(data=data.frame(x=c(-8,-8,8,8,-8),y=c(0,19,19,0,0)),aes(x=x,y=y))+
+        #box inside key
+        geom_path(data=data.frame(x=c(-6,-6,6,6,-6),y=c(0,19,19,0,0)),aes(x=x,y=y))+
+        #restricted area semicircle
+        geom_path(data=data.frame(x=c(-4000:(-1)/1000,1:4000/1000),y=c(5.25+sqrt(4^2-c(-4000:(-1)/1000,1:4000/1000)^2))),aes(x=x,y=y))+
+        #halfcourt semicircle
+        geom_path(data=data.frame(x=c(-6000:(-1)/1000,1:6000/1000),y=c(47-sqrt(6^2-c(-6000:(-1)/1000,1:6000/1000)^2))),aes(x=x,y=y))+
+        #rim
+        geom_path(data=data.frame(x=c(-750:(-1)/1000,1:750/1000,750:1/1000,-1:-750/1000),y=c(c(5.25+sqrt(0.75^2-c(-750:(-1)/1000,1:750/1000)^2)),c(5.25-sqrt(0.75^2-c(750:1/1000,-1:-750/1000)^2)))),aes(x=x,y=y))+
+        #backboard
+        geom_path(data=data.frame(x=c(-3,3),y=c(4,4)),aes(x=x,y=y),lineend='butt')+
+        #3 pt. line
+        geom_path(data=data.frame(x=c(-22,-22,-22000:(-1)/1000,1:22000/1000,22,22),y=c(0,169/12,5.25+sqrt(23.75^2-c(-22000:(-1)/1000,1:22000/1000)^2),169/12,0)),aes(x=x,y=y))+
+        #shot type identifier based on color and shape
+        geom_point(aes(colour = shot_zone_basic, shape = event_type)) +
+        xlim(-25, 25) +
+        ylim(-5, 47)
+    })
+    
+    output$shottable=renderTable({
+      tablelocation()
+      
+      
+    })
+    output$actiontable=renderTable({
+      tableaction()
+      
+      
+    })
   })
   
   observeEvent(input$gen_plot_comp, {
@@ -70,18 +128,18 @@ shinyServer(function(input, output) {
     # Can display a table maybe?
     if({input$choices == "Individual Player Stats"}) {
       output$school1table <- renderTable({school1_subset() %>% select(Name = display_first_last, drafted = from_year, team_city, team_name, game_played = games,
-                                                                    FG_percent = FG_per, FT_percent = FT_per, Minutes_pergame = MP_pg, PPG = PTSpg, RPG = TRB_pg, AST = AST_pg)})
+                                                                      FG_percent = FG_per, FT_percent = FT_per, Minutes_pergame = MP_pg, PPG = PTSpg, RPG = TRB_pg, AST = AST_pg)})
       output$school2table <- renderTable({school2_subset() %>% select(Name = display_first_last, drafted = from_year, team_city, team_name, game_played = games,
-                                                                   FG_percent = FG_per, FT_percent = FT_per, Minutes_pergame = MP_pg, PPG = PTSpg, RPG = TRB_pg, AST = AST_pg)})
+                                                                      FG_percent = FG_per, FT_percent = FT_per, Minutes_pergame = MP_pg, PPG = PTSpg, RPG = TRB_pg, AST = AST_pg)})
     }
     if({input$choices == "School-Aggregated Stats"}) {
       output$school1table <- renderTable({school1_subset() %>% summarize(School = as.character(input$school1), Avg_games_played = mean(as.numeric(games)),
                                                                          FG_percent = mean(as.numeric(FG_per)), FT_percent = mean(as.numeric(FT_per)), Minutes_pergame = mean(as.numeric(MP_pg)), PPG = mean(as.numeric(PTSpg)), RPG = mean(as.numeric(TRB_pg)), APG = mean(as.numeric(AST_pg))) })
       output$school2table <- renderTable({school2_subset() %>% summarize(School = as.character(input$school2), Avg_games_played = mean(as.numeric(games)),
-                                                                          FG_percent = mean(as.numeric(FG_per)), FT_percent = mean(as.numeric(FT_per)), Minutes_pergame = mean(as.numeric(MP_pg)), PPG = mean(as.numeric(PTSpg)), RPG = mean(as.numeric(TRB_pg)), APG = mean(as.numeric(AST_pg))) })
+                                                                         FG_percent = mean(as.numeric(FG_per)), FT_percent = mean(as.numeric(FT_per)), Minutes_pergame = mean(as.numeric(MP_pg)), PPG = mean(as.numeric(PTSpg)), RPG = mean(as.numeric(TRB_pg)), APG = mean(as.numeric(AST_pg))) })
     }
   })
   
-  })
-  
-  
+})
+
+

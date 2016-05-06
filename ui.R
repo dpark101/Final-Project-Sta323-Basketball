@@ -2,22 +2,42 @@ library(shiny)
 library(ggplot2)
 library(dplyr)
 library(jsonlite)
-
+load("players.Rdata")
+load("active_players.Rdata")
 
 shinyUI(
   navbarPage("NBA App",
              tabPanel("Shot Chart Generator",
                       sidebarPanel(
-                        selectInput("player", "Player:",players$display_first_last, selected = "Stephen Curry"),
+                        selectInput("player", "Player:",players$display_first_last, selected = "Kobe Bryant"),
                         hr(),
                         uiOutput("season"),
-                        actionButton("gen_plot", "Generate Shot Chart")
+                        actionButton("gen_plot", "Generate Shot Chart"),
+                        hr(),
+                        
+                        
+                        selectInput("regulation", "regulation time:",c("regulation", "overtime"), selected="regulation"),
+                        conditionalPanel(
+                          
+                          condition= "input.regulation=='regulation'",
+                          sliderInput("time", label = h3("Minutes"), min = 0, 
+                                      max = 48, value = c(0, 48))
+                        ),
+                        conditionalPanel(
+                          condition="input.regulation=='overtime'"
+                          
+                        )
+                        
                       ),
                       
                       mainPanel(
                         h4("Results"),
                         plotOutput("shot_plot"),
-                        hr()
+                        hr(),
+                        h4("Location of Shots"),
+                        tableOutput("shottable"),
+                        h4("Action of Shots"),
+                        tableOutput("actiontable")
                       )
              ),
              tabPanel("Compare your school!",
@@ -35,6 +55,6 @@ shinyUI(
                         hr(),
                         tableOutput('school2table')
                       )
+             )
   )
-)
 )

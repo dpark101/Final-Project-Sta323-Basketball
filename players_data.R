@@ -9,3 +9,5 @@ names(players) = tolower(players_data$resultSets$headers[[1]])
 # Only get active players
 
 players <- players %>% filter(rosterstatus != 0)
+save(players, file="players.Rdata")
+
