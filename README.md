@@ -1,4 +1,5 @@
 # Final-Project-Sta323-Basketball
+Team: Michael Gao, Daniel Park, Justin Wang, Kaila Perez, Christopher Kehan Zhang
 ##File explanation
 Players_data.R pulls all NBA players in history into a dataframe. 
 Get_shots.R gets JSON data for every shot made by a specific player in a specific season then converts it into a tidy dataframe.
