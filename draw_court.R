@@ -1,4 +1,6 @@
-#We don't actually use this code but just for reference sake I left it for now.
+#We don't actually use this code but just for reference sake we left it in here.
+#We tried two methods to draw the court, image overlay: faster but less accurate, and ggplot.
+#Both were good but we ended up using ggplot method.
 #https://gist.github.com/edkupfer/6354404
 library(ggplot2)
 
