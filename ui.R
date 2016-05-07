@@ -36,8 +36,12 @@ shinyUI(
                         hr(),
                         h4("Location of Shots"),
                         tableOutput("shottable"),
-                        h4("Action of Shots"),
-                        tableOutput("actiontable")
+                        h4("Type of shots"),
+                        tableOutput("actiontable"),
+                        h4("Breakdown of Location of Made Shots"),
+                        plotOutput("pieshot"),
+                        h4("Breakdown of Type of Made Shots"),
+                        plotOutput("pieaction")
                       )
              ),
              tabPanel("Compare your school!",

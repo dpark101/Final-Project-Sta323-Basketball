@@ -116,6 +116,20 @@ shinyServer(function(input, output) {
       
       
     })
+    
+    output$pieshot= renderPlot({
+      ggplot(data=tablelocation(),
+             aes(x= shots_made,fill = factor(location))) + geom_bar(width = 1) + 
+        coord_polar(theta="y") + xlab("Percent of Made Shots")
+    }
+    )
+    
+    output$pieaction= renderPlot({
+      ggplot(data=tableaction(),
+             aes(x= shots_made,fill = factor(action))) + geom_bar(width = 1) + 
+        coord_polar(theta="y") + xlab("Percent of Made Shots")
+    }
+    )
   })
   
   observeEvent(input$gen_plot_comp, {
@@ -147,31 +161,29 @@ shinyServer(function(input, output) {
     if({input$choices == "School-Aggregated Stats"}) {
       output$school1table <- renderTable({school1()})
       output$school2table <- renderTable({school2() })
-      output$visual1=renderPlot(barplot(rbind(as.numeric(school1()%>%select(PPG,APG, RPG)), as.numeric(school2()%>%select(PPG,APG, RPG))), beside=TRUE, names=c("PPG", "APG", "RPG"), col=c("blue", "red"), legend = c(input$school1, input$school2), 
-                                        main=paste0(input$school1, " vs ", input$school2)))
-      
-      
-      output$visual2=renderPlot({
-        if (input$checkbox==TRUE){
-          
-          a=barplot(rbind(as.numeric(school1()%>%select(FG_percent, FT_percent)), as.numeric(school2()%>%select(FG_percent, FT_percent))), beside=TRUE, names=c("FG_percent", "FT_percent"), col=c("blue", "red"), legend = c(input$school1, input$school2), 
-                    main=paste0(input$school1, " vs ", input$school2))
-          return(a)
-        }
-      })
-      output$visual1=renderPlot({
-        if (input$checkbox==TRUE){
-          
-          a=barplot(rbind(as.numeric(school1()%>%select(PPG,APG, RPG)), as.numeric(school2()%>%select(PPG,APG, RPG))), beside=TRUE, names=c("PPG", "APG", "RPG"), col=c("blue", "red"), legend = c(input$school1, input$school2), 
-                    main=paste0(input$school1, " vs ", input$school2))
-          
-          return(a)
-        }
-      })
-      
     }
+    
+    
+    output$visual2=renderPlot({
+      if (input$checkbox==TRUE){
+        
+        a=barplot(rbind(as.numeric(school1()%>%select(FG_percent, FT_percent)), as.numeric(school2()%>%select(FG_percent, FT_percent))), beside=TRUE, names=c("FG_percent", "FT_percent"), col=c("blue", "red"), legend = c(input$school1, input$school2), 
+                  main=paste0(input$school1, " vs ", input$school2))
+        return(a)
+      }
+    })
+    output$visual1=renderPlot({
+      if (input$checkbox==TRUE){
+        
+        a=barplot(rbind(as.numeric(school1()%>%select(PPG,APG, RPG)), as.numeric(school2()%>%select(PPG,APG, RPG))), beside=TRUE, names=c("PPG", "APG", "RPG"), col=c("blue", "red"), legend = c(input$school1, input$school2), 
+                  main=paste0(input$school1, " vs ", input$school2))
+        
+        return(a)
+      }
+    })
+    
+    
   })
   
 })
-
 
