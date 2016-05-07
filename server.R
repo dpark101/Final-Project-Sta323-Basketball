@@ -132,6 +132,7 @@ shinyServer(function(input, output) {
     )
   })
   
+  
   observeEvent(input$gen_plot_comp, {
     # First, filter datasets by selected schools:
     school1_subset <- reactive({active_players %>% 

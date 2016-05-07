@@ -36,7 +36,7 @@ shinyUI(
                         hr(),
                         h4("Location of Shots"),
                         tableOutput("shottable"),
-                        h4("Type of shots"),
+                        h4("Action of Shots"),
                         tableOutput("actiontable"),
                         h4("Breakdown of Location of Made Shots"),
                         plotOutput("pieshot"),
@@ -51,7 +51,6 @@ shinyUI(
                         selectInput("school2", "Select Second School:", sort(unique(active_players$school)), selected = "University of North Carolina"), # Maybe make so you can't select same school?
                         radioButtons("choices", "Display:", c("School-Aggregated Stats", "Individual Player Stats")),
                         actionButton('gen_plot_comp', "Compare Alumni NBA Stats!"),
-                        
                         
                         checkboxInput("checkbox", label = "show plots", value = FALSE)
                         
