@@ -120,13 +120,13 @@ shinyServer(function(input, output) {
     output$pieshot= renderPlot({
       ggplot(data=tablelocation(),
              aes(x= "", y = shots_made, fill = factor(location))) + geom_bar(width = 1, stat = "identity") + 
-        coord_polar(theta="y", start = 0) + xlab("Percent of Made Shots")
+        coord_polar(theta="y", start = 0) 
     })
     
     output$pieaction= renderPlot({
       ggplot(data=tableaction(),
              aes(x= "", y = shots_made, fill = factor(action))) + geom_bar(width = 1, stat = "identity") + 
-        coord_polar(theta="y", start = 0) + xlab("Percent of Made Shots")
+        coord_polar(theta="y", start = 0) 
     })
   })
   
